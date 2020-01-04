@@ -4,8 +4,8 @@
 ConnectN <- setRefClass("ConnectN",
                      fields = list(
                        n = "integer",
-                       k = "integer",
-                       l = "integer",
+                       nrow = "integer",
+                       ncol = "integer",
                        board = "matrix",
                        verbose = "logical",
                        locked = "logical"
@@ -15,7 +15,11 @@ ConnectN <- setRefClass("ConnectN",
                          verbose <<- T
                          locked <<- F
                          initFields(...)
-                         board <<- matrix(0, nrow = k, ncol = l)
+                         board <<- matrix(0, nrow = nrow, ncol = ncol)
+                       },
+                       getValidMoves = function() {
+                         if (locked) return(0)
+                         which(isValidMove(1:ncol(board)))
                        },
                        isValidMove = function(column) {
                          board[1, column] == 0
@@ -73,7 +77,7 @@ ConnectN <- setRefClass("ConnectN",
                        },
                        checkDiagLLRU = function(row, column, player) {
                          rotMat <- rotate(rotate(rotate(board)))
-                         newRow <- ncol(board) - column + 1
+                         newRow <- ncol - column + 1
                          newColumn <- row
                          relevantCells <- rotMat[col(rotMat) + newRow == row(rotMat) + newColumn] %>% rev()
                          if (which(relevantCells == player) %>% hasSeq(n)) {
