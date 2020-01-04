@@ -2,6 +2,7 @@
 
 # TODO: default values if not provided in $new()
 ConnectN <- setRefClass("ConnectN",
+                        
                      fields = list(
                        n = "integer",
                        nrow = "integer",
@@ -10,13 +11,16 @@ ConnectN <- setRefClass("ConnectN",
                        verbose = "logical",
                        locked = "logical"
                        ),
+                     
                      methods = list(
+                       # Called by $new()
                        initialize = function(...) {
                          verbose <<- T
                          locked <<- F
                          initFields(...)
                          board <<- matrix(0, nrow = nrow, ncol = ncol)
                        },
+                       # Vector of non-full columns if the board is not locked
                        getValidMoves = function() {
                          if (locked) return(0)
                          which(isValidMove(1:ncol(board)))
@@ -27,7 +31,7 @@ ConnectN <- setRefClass("ConnectN",
                        getEmptyCellRow = function(column) {
                          max(which(board[, column] == 0))
                        },
-                       makeMove = function(player, column) {
+                       makeMove = function(column, player) {
                          if (locked) stop("Board is locked. Clear to play a new game.")
                          if (!isValidMove(column))
                            stop("Not a valid move.")
@@ -38,7 +42,13 @@ ConnectN <- setRefClass("ConnectN",
                          if (winner != 0) {
                            if (verbose) message(paste0("Player ", winner, " won!"))
                            locked <<- T
+                         } else if (isDraw()) {
+                           locked <<- T
+                           if (verbose) message("Draw.")
                          }
+                       },
+                       isDraw = function() {
+                         all(board == 0)
                        },
                        # Don't check the whole board, just check adjacent cells
                        getWinner = function(row, column) {
@@ -93,5 +103,6 @@ ConnectN <- setRefClass("ConnectN",
                          locked <<- F
                        }
                      )
+                     
                      )
 

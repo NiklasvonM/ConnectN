@@ -13,3 +13,15 @@ hasSeq <- function(vec, length) {
 }
 
 rotate <- function(x) t(apply(x, 2, rev))
+
+cyclePlayer <- function(player, players) {
+  if (player == players[length(players)]) {
+    player <- players[1]
+  } else {
+    player <- players[which(players == player) + 1]
+  }
+  return(player)
+}
+
+
+
