@@ -7,9 +7,13 @@ ConnectN <- setRefClass("ConnectN",
                        k = "integer",
                        l = "integer",
                        board = "matrix",
-                       verbose = "logical"),
+                       verbose = "logical",
+                       locked = "logical"
+                       ),
                      methods = list(
                        initialize = function(...) {
+                         verbose <<- T
+                         locked <<- F
                          initFields(...)
                          board <<- matrix(0, nrow = k, ncol = l)
                        },
@@ -20,6 +24,7 @@ ConnectN <- setRefClass("ConnectN",
                          max(which(board[, column] == 0))
                        },
                        makeMove = function(player, column) {
+                         if (locked) stop("Board is locked. Clear to play a new game.")
                          if (!isValidMove(column))
                            stop("Not a valid move.")
                          row <- getEmptyCellRow(column)
@@ -28,7 +33,7 @@ ConnectN <- setRefClass("ConnectN",
                          winner <- getWinner(row, column)
                          if (winner != 0) {
                            if (verbose) message(paste0("Player ", winner, " won!"))
-                           # TODO: Stop the game.
+                           locked <<- T
                          }
                        },
                        # Don't check the whole board, just check adjacent cells
@@ -81,6 +86,7 @@ ConnectN <- setRefClass("ConnectN",
                        },
                        clearBoard = function() {
                          board[T, T] <<- 0
+                         locked <<- F
                        }
                      )
                      )
