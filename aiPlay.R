@@ -3,13 +3,13 @@
 # I.e. if players = c(1, 2), humanPlayers = 1, then ais must be a list with
 # an AI at position 2.
 playGame <- function(players = c(1, 2), humanPlayers = integer(),  
-                     ais = list(), game = NA,
+                     ais = list(), game = NULL,
                      n = 4L, nrow = 6L, ncol = 7L, seed = NA, maxIts = 1000, ...) {
   if (!is.na(seed)) set.seed(seed)
   players <- unique(players)
   humanPlayers <- unique(humanPlayers)
   computerPlayers <- players[!players %in% humanPlayers]
-  if (is.na(game)) game <- ConnectN$new(n = n, nrow = nrow, ncol = ncol, ...)
+  if (is.null(game)) game <- ConnectN$new(n = n, nrow = nrow, ncol = ncol, ...)
   it <- 1
   # Play games until aborted
   repeat {
@@ -34,17 +34,16 @@ playGame <- function(players = c(1, 2), humanPlayers = integer(),
       # AI case
       } else {
         ai <- ais[[player]]
-        move <- game$getValidMoves() %>% sample(1)
-        winner <- game$makeMove(move, player)
-        # Save move
         boardStates[[player]][[counter[[player]]]] <- ai$maybeAttachGameState(game)
+        move <- ai$getMove(game$board)
+        winner <- game$makeMove(move, player)
         movesMade[[player]][[counter[[player]]]] <- move
         counter[[player]] <- counter[[player]] + 1
       }
       player %<>% cyclePlayer(players)
       if (game$locked) {
         if (length(computerPlayers) > 0) {
-          cat("Training ai...\n")
+          cat(paste0("\rTraining ai (iteration ", it, ")...\n"))
           for (aiIndex in computerPlayers) {
             outcome <- if (winner == 0) {
               0
@@ -62,8 +61,9 @@ playGame <- function(players = c(1, 2), humanPlayers = integer(),
     if (any(humanPlayers %in% players)) {
       again <- readline("Play again? ")
       if (!as.character(again) %in% c(
-        "T", "TRUE", "true", "True", "Yes", "Yes.", "Ja", "Ja.", "ja", "yes", "1", "Klar."
+        "T", "TRUE", "true", "True", "Yes", "Yes.", "Ja", "Ja.", "ja", "yes", "1", "Klar.", "y", "j"
       )) {
+        game$clearBoard()
         break
       }
     }

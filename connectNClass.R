@@ -33,8 +33,12 @@ ConnectN <- setRefClass("ConnectN",
                        },
                        makeMove = function(column, player) {
                          if (locked) stop("Board is locked. Clear to play a new game.")
-                         if (!isValidMove(column))
+                         if (!isValidMove(column)) {
+                           # For debugging purposes
+                           printBoard()
+                           print(column)
                            stop("Not a valid move.")
+                         }
                          row <- getEmptyCellRow(column)
                          board[row, column] <<- player
                          if (verbose) printBoard()

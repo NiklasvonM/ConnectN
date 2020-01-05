@@ -8,12 +8,14 @@ AI <- setRefClass("AI",
                     # Board parameters from ConnectN
                     n = "integer",
                     nrow = "integer",
-                    ncol = "integer"
+                    ncol = "integer",
+                    oddsBestMove = "numeric"
                   ),
                   
                   methods = list(
                     initialize = function(...) {
                       S <<- list()
+                      oddsBestMove <<- 0.5
                       initFields(...)
                     },
                     maybeAttachGameState = function(game) {
@@ -34,7 +36,7 @@ AI <- setRefClass("AI",
                       )
                       return(invisible(index))
                     },
-                    getMove = function(board, oddsBestMove) {
+                    getMove = function(board) {
                       stopifnot(0 <= oddsBestMove & oddsBestMove <= 1)
                       index <- getSIndex(board)
                       # Make the best move
@@ -44,6 +46,7 @@ AI <- setRefClass("AI",
                       # Make a random move
                       } else {
                         move <- which(S[[index]]$r > -Inf) %>% sample(1)
+                        assertthat::assert_that(S[[index]]$board[1, move] == 0)
                       }
                       return(move)
                     },
@@ -52,13 +55,13 @@ AI <- setRefClass("AI",
                     # boards: list of boards (i.e. matrices)
                     # moves: list or vector of moves (i.e. numbers from 1 to ncol)
                     # outcome: -1, 0 or 1
-                    adjustRewards = function(boards, moves, outcome) {
+                    adjustRewards = function(boardIndices, moves, outcome) {
                       if (!outcome %in% c(-1, 0, 1)) stop("Outcome must be -1, 0 or 1.")
-                      if (length(boards) != length(moves)) stop("Number of states must agree with number of moves.")
+                      if (length(boardIndices) != length(moves)) stop("Number of states must agree with number of moves.")
                       # Iterate through states to adjust the reward function
-                      for (i in 1:length(boards)) {
+                      for (i in 1:length(boardIndices)) {
                         # Get the index of the board in S
-                        index <- getSIndex(boards[[i]])
+                        index <- boardIndices[[i]]
                         # S: state list
                         # index: index of the board state
                         # r: reward function (vector)
