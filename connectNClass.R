@@ -42,9 +42,11 @@ ConnectN <- setRefClass("ConnectN",
                          if (winner != 0) {
                            if (verbose) message(paste0("Player ", winner, " won!"))
                            locked <<- T
+                           return(invisible(winner))
                          } else if (isDraw()) {
                            locked <<- T
                            if (verbose) message("Draw.")
+                           return(invisible(0))
                          }
                        },
                        isDraw = function() {
