@@ -5,6 +5,7 @@ AI <- setRefClass("AI",
                     # number of games this state has occured in ("n")
                     # and the reward function values for each move ("r")
                     S = "list",
+                    # Board parameters from ConnectN
                     n = "integer",
                     nrow = "integer",
                     ncol = "integer"
@@ -16,54 +17,69 @@ AI <- setRefClass("AI",
                       initFields(...)
                     },
                     maybeAttachGameState = function(game) {
-                      for (s in S) {
-                        if (all(game$board == s$board)) {
-                          return(invisible(0))
+                      if (length(S) > 0) for (i in 1:length(S)) {
+                        if (all(game$board == S[[i]]$board)) {
+                          return(invisible(i))
                         }
                       }
                       # Initialize reward function: -Inf for invalid moves, 0 for valid ones
                       r <- vector(mode = "numeric", length = game$ncol)
                       r[T] <- -Inf
                       r[game$getValidMoves()] <- 0
-                      S[[paste0("state_", length(S) + 1)]] <<- list(
+                      index <- length(S) + 1
+                      S[[paste0("state_", index)]] <<- list(
                         board = game$board,
                         n = 1,
                         r = r
                       )
+                      return(invisible(index))
                     },
-                    adjustRewards = function(states, moves, outcome) {
+                    getMove = function(board, oddsBestMove) {
+                      stopifnot(0 <= oddsBestMove & oddsBestMove <= 1)
+                      index <- getSIndex(board)
+                      # Make the best move
+                      if (runif(1, 0, 1) <= oddsBestMove) {
+                        # sample(1) in case there are multiple best moves
+                        move <- which(S[[index]]$r == max(S[[index]]$r)) %>% sample(1)
+                      # Make a random move
+                      } else {
+                        move <- which(S[[index]]$r > -Inf) %>% sample(1)
+                      }
+                      return(move)
+                    },
+                    # Increase or decrease reward vectors for the board states and moves based on the outcome
+                    #
+                    # boards: list of boards (i.e. matrices)
+                    # moves: list or vector of moves (i.e. numbers from 1 to ncol)
+                    # outcome: -1, 0 or 1
+                    adjustRewards = function(boards, moves, outcome) {
                       if (!outcome %in% c(-1, 0, 1)) stop("Outcome must be -1, 0 or 1.")
-                      if (length(states) != length(moves)) stop("Number of states must agree with number of moves.")
+                      if (length(boards) != length(moves)) stop("Number of states must agree with number of moves.")
                       # Iterate through states to adjust the reward function
-                      for (i in 1:length(states)) {
-                        # Get the index of the state in S
-                        for (j in 1:length(S)) {
-                          if (all(S[[j]]$board == states[[i]])) {
-                            index <- j
-                            break
-                          }
-                        }
+                      for (i in 1:length(boards)) {
+                        # Get the index of the board in S
+                        index <- getSIndex(boards[[i]])
                         # S: state list
                         # index: index of the board state
                         # r: reward function (vector)
                         # i: index of current move/state
-                        S[[index]]$r[moves[[i]]] <<- S[[index]]$r[moves[[i]]] + outcome
+                        # S[[index]]$n: number of times that game state has occured before
+                        S[[index]]$r[moves[[i]]] <<- (S[[index]]$r[moves[[i]]] * S[[index]]$n + outcome) / (S[[index]]$n + 1)
+                        S[[index]]$n <<- S[[index]]$n + 1
                       }
+                    },
+                    # Get the index in S for which S$board agrees with board
+                    getSIndex = function(board) {
+                      for (j in 1:length(S)) {
+                        if (all(S[[j]]$board == board)) {
+                          return(j)
+                        }
+                      }
+                      stop("Board state not found! Please call maybeAttachGameState() on the game this board state occures on.")
                     }
                   )
                   )
 
-ai <- AI$new(n = 4L, nrow = 6L, ncol = 7L)
-ai$S
-source("source.R")
-game <- ConnectN$new(n = 4L, nrow = 6L, ncol = 7L)
-game$printBoard()
-ai$maybeAttachGameState(game)
-ai$adjustRewards(list(state_1 = game$board), list(move_1 = 4), 1)
-game$makeMove(4, 1)
-ai$maybeAttachGameState(game)
-ai$adjustRewards(list(state_1 = game$board), list(move_1 = 4), 1)
-ai$S
 
 
 
