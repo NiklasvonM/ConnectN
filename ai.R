@@ -39,14 +39,15 @@ AI <- setRefClass("AI",
                     getMove = function(board) {
                       stopifnot(0 <= oddsBestMove & oddsBestMove <= 1)
                       index <- getSIndex(board)
+                      possibleMoves <- which(S[[index]]$board[1, ] == 0)
                       # Make the best move
                       if (runif(1, 0, 1) <= oddsBestMove) {
                         # sample(1) in case there are multiple best moves
-                        move <- which(S[[index]]$r == max(S[[index]]$r)) %>% sample(1)
+                        move <- which(S[[index]]$r == max(S[[index]]$r[possibleMoves]))[1]
                       # Make a random move
                       } else {
-                        move <- which(S[[index]]$r > -Inf) %>% sample(1)
-                        assertthat::assert_that(S[[index]]$board[1, move] == 0)
+                        move <- possibleMoves[sample(1:length(possibleMoves), 1)]
+                        #assertthat::assert_that(S[[index]]$board[1, move] == 0)
                       }
                       return(move)
                     },

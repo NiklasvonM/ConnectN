@@ -54,7 +54,7 @@ ConnectN <- setRefClass("ConnectN",
                          }
                        },
                        isDraw = function() {
-                         all(board == 0)
+                         !any(board == 0)
                        },
                        # Don't check the whole board, just check adjacent cells
                        getWinner = function(row, column) {

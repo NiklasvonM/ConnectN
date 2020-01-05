@@ -1,15 +1,4 @@
 source("source.R")
-# connectFour <- ConnectN$new(n = 4L, nrow = 6L, ncol = 7L, verbose = T)
-# connectFour$makeMove(4, 1)
-# connectFour$makeMove(4, 1)
-# connectFour$makeMove(4, 1)
-# connectFour$makeMove(4, 1)
-# 
-# connectFour$clearBoard()
-# 
-# connectFour$getValidMoves()
-
-source("source.R")
 ai1 <- AI$new(n = 4L, ncol = 7L, nrow = 6L)
 ai2 <- AI$new(n = 4L, ncol = 7L, nrow = 6L)
 ais <- list()
