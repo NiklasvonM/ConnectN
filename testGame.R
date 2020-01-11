@@ -4,8 +4,8 @@ ai2 <- AI$new(n = 4L, ncol = 7L, nrow = 6L)
 ais <- list()
 ais[[1]] <- ai1
 ais[[2]] <- ai2
-game <- ConnectN$new(n = 4L, ncol = 7L, nrow = 6L, verbose = F)
-playGame(players = c(1, 2), ais = ais, maxIts = 10000, game = game)
+game <- ConnectN$new(n = 4L, ncol = 7L, nrow = 6L, verbose = T)
+playGame(players = c(1, 2), humanPlayers = c(1), ais = ais, maxIts = 10000, game = game)
 ai2$oddsBestMove <- 1
 game$clearBoard()
 ais <- list()

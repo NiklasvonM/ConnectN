@@ -1,1 +1,1 @@
-# nWins
+# ConnectN
